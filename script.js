@@ -40,36 +40,31 @@ function updateCountdown() {
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
-/* ---------- Corner scroll-morph shape ----------
-   The small SVG in the bottom-right corner morphs its path
-   as the user scrolls the page, from an angular/broken shape
-   at the top to a smooth circular shape at the bottom —
-   a literal, small-scale metamorphosis tied to scroll progress.
-   Purely decorative; does not block any content or interaction.
+/* ---------- Corner scroll butterfly life-cycle ----------
+   Egg (0–25%) -> Caterpillar (25–50%) -> Chrysalis (50–75%) -> Butterfly (75–100%)
 */
-
-// A jagged "fragment" polygon path (start state)
-const SHAPE_JAGGED = "M60,10 L95,35 L110,75 L80,110 L40,105 L15,70 L25,30 Z";
-// A smooth circular path (end state), same point count for interpolation feel
-const SHAPE_SMOOTH = "M60,10 C85,10 110,35 110,60 C110,85 85,110 60,110 C35,110 10,85 10,60 C10,35 35,10 60,10 Z";
-
-const morphPath = document.getElementById("morphPath");
+const STAGES = ["stage-egg", "stage-caterpillar", "stage-chrysalis", "stage-butterfly"];
+const STAGE_LABELS = ["Egg", "Caterpillar", "Chrysalis", "Butterfly"];
 const morphLabel = document.getElementById("morphLabel");
 
-function setMorphShape(progress) {
-  // progress: 0 (top of page) -> 1 (bottom of page)
-  // Simple crossfade between two path strings isn't natively interpolable
-  // without a library, so we switch shape at the midpoint with a smooth
-  // stroke-based transition handled by CSS, keeping this dependency-free.
-  morphPath.setAttribute("d", progress < 0.5 ? SHAPE_JAGGED : SHAPE_SMOOTH);
-  morphLabel.textContent = Math.round(progress * 100) + "%";
+function setStage(progress) {
+  let idx;
+  if (progress < 0.25) idx = 0;
+  else if (progress < 0.5) idx = 1;
+  else if (progress < 0.75) idx = 2;
+  else idx = 3;
+
+  STAGES.forEach((id, i) => {
+    document.getElementById(id).classList.toggle("active", i === idx);
+  });
+  morphLabel.textContent = STAGE_LABELS[idx];
 }
 
 function onScroll() {
   const scrollTop = window.scrollY;
   const docHeight = document.documentElement.scrollHeight - window.innerHeight;
   const progress = docHeight > 0 ? Math.min(Math.max(scrollTop / docHeight, 0), 1) : 0;
-  setMorphShape(progress);
+  setStage(progress);
 }
 
 window.addEventListener("scroll", onScroll, { passive: true });
